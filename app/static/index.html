@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Converter & Merger</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="card header">
+      <div class="logo-row">
+        <div class="logo">PDF</div>
+        <div>
+          <h1>PDF Converter & Merger</h1>
+          <p>드래그하고, 변환하고, 병합하세요</p>
+        </div>
+      </div>
+      <span class="badge">30+ 포맷 지원</span>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Upload Zone</h2>
+        <label id="dropzone" class="dropzone" for="fileInput" tabindex="0" aria-label="파일 업로드 영역">
+          <input id="fileInput" type="file" multiple hidden>
+          <div id="dropText">파일을 여기에 드래그하거나 클릭하여 선택</div>
+          <small>.docx .pptx .xlsx .pdf .jpg .png .html .md 외 다수</small>
+        </label>
+        <div id="errorBox" class="error-box" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <h2>파일 목록</h2>
+        <ul id="fileList" class="file-list" aria-live="polite"></ul>
+        <div class="summary"><span id="summaryText">총 0개 파일 / 합산 0 MB</span></div>
+      </div>
+    </section>
+
+    <section class="card action-bar">
+      <label for="outputName">출력 파일명</label>
+      <input id="outputName" type="text" placeholder="merged_YYYYMMDD_HHMMSS.pdf">
+      <button id="startBtn" disabled>변환 및 병합 시작</button>
+      <button id="resetBtn" class="secondary">다시 시작</button>
+    </section>
+
+    <section class="card">
+      <h2>진행 상태</h2>
+      <div class="progress-wrap">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <p id="progressText">대기 중</p>
+      <ul id="statusList" class="status-list"></ul>
+      <div class="actions-inline">
+        <button id="downloadBtn" class="success hidden">다운로드</button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      지원 포맷: Office, 이미지, PDF, HTML, Markdown, Text |
+      개인정보 최소 수집 |
+      문의: support@example.com
+    </footer>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
