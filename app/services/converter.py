@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 
 
 OFFICE_EXTENSIONS = {".docx", ".doc", ".odt", ".rtf", ".xlsx", ".xls", ".ods", ".csv", ".pptx", ".ppt", ".odp"}
@@ -90,6 +91,17 @@ def _fallback_text_pdf(
     c.save()
 
 
+def _fallback_image_pdf(source_file: Path, output_pdf: Path) -> None:
+    image = ImageReader(str(source_file))
+    img_width, img_height = image.getSize()
+
+    # Keep a simple, predictable layout: one image per page at native size.
+    c = canvas.Canvas(str(output_pdf), pagesize=(float(img_width), float(img_height)))
+    c.drawImage(image, 0, 0, width=float(img_width), height=float(img_height), preserveAspectRatio=True, mask="auto")
+    c.showPage()
+    c.save()
+
+
 async def convert_to_pdf(source_file: Path, output_pdf: Path) -> None:
     ext = source_file.suffix.lower()
 
@@ -133,9 +145,17 @@ async def convert_to_pdf(source_file: Path, output_pdf: Path) -> None:
     if ext in IMAGE_EXTENSIONS:
         image_command = _resolve_imagemagick()
         if image_command:
-            await asyncio.to_thread(_run_command, [*image_command, str(source_file), str(output_pdf)])
+            try:
+                await asyncio.to_thread(_run_command, [*image_command, str(source_file), str(output_pdf)])
+                return
+            except subprocess.CalledProcessError:
+                # Some container images ship restrictive ImageMagick policy.xml
+                # that blocks PDF writing. Fall back to a pure-Python conversion.
+                pass
+        await asyncio.to_thread(_fallback_image_pdf, source_file, output_pdf)
+        if output_pdf.exists():
             return
-        raise RuntimeError("ImageMagick가 없어 이미지 변환을 수행할 수 없습니다.")
+        raise RuntimeError("이미지 PDF 변환에 실패했습니다.")
 
     if ext in HTML_EXTENSIONS:
         wkhtmltopdf = _resolve_executable("wkhtmltopdf")
