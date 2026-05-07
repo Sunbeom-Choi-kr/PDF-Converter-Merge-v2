@@ -22,6 +22,13 @@ const progressText = document.getElementById("progressText");
 const statusList = document.getElementById("statusList");
 const downloadBtn = document.getElementById("downloadBtn");
 
+function makeId() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 function ext(name) {
   const parts = name.toLowerCase().split(".");
   return parts.length > 1 ? `.${parts.pop()}` : "";
@@ -121,14 +128,14 @@ fileList.addEventListener("drop", () => {
 });
 
 function addFiles(fileListLike) {
-  const files = [...fileListLike];
+  const files = Array.from(fileListLike || []);
   for (const file of files) {
     const error = canAdd(file);
     if (error) {
       showError(error);
       continue;
     }
-    state.files.push({ id: crypto.randomUUID(), file, name: file.name, size: file.size });
+    state.files.push({ id: makeId(), file, name: file.name, size: file.size });
   }
   renderFiles();
 }
