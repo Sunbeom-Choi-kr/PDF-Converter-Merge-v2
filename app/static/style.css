@@ -23,6 +23,17 @@ body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: 
 }
 .dropzone.active { background: #eff6ff; border-style: solid; border-color: var(--primary); }
 .dropzone.error { border-color: var(--error); background: #fef2f2; }
+.sr-only-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 .error-box { margin-top: 10px; color: var(--error); min-height: 20px; }
 .file-list, .status-list { list-style: none; padding: 0; margin: 0; }
 .file-item, .status-item {

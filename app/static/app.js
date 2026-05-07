@@ -140,7 +140,11 @@ function addFiles(fileListLike) {
   renderFiles();
 }
 
-dropzone.addEventListener("click", () => fileInput.click());
+dropzone.addEventListener("click", () => {
+  // Allow selecting the same file repeatedly across mobile browsers.
+  fileInput.value = "";
+  fileInput.click();
+});
 dropzone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropzone.classList.add("active");
