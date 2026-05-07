@@ -61,8 +61,8 @@ def _resolve_imagemagick() -> Optional[list[str]]:
     return None
 
 
-def _run_command(command: list[str], timeout_seconds: int = 60) -> None:
-    subprocess.run(command, check=True, timeout=timeout_seconds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def _run_command(command: list[str], timeout_seconds: int = 60) -> subprocess.CompletedProcess:
+    return subprocess.run(command, check=True, timeout=timeout_seconds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def _fallback_text_pdf(
@@ -134,13 +134,23 @@ async def convert_to_pdf(source_file: Path, output_pdf: Path) -> None:
             str(output_pdf.parent),
             str(source_file),
         ]
-        await asyncio.to_thread(_run_command, command)
+        try:
+            await asyncio.to_thread(_run_command, command)
+        except subprocess.CalledProcessError as error:
+            stderr = (error.stderr or b"").decode("utf-8", errors="ignore").strip()
+            stdout = (error.stdout or b"").decode("utf-8", errors="ignore").strip()
+            detail = stderr or stdout or "no stderr/stdout"
+            raise RuntimeError(f"LibreOffice conversion failed: {detail}") from error
         generated = output_pdf.parent / f"{source_file.stem}.pdf"
         if generated != output_pdf and generated.exists():
             generated.replace(output_pdf)
         if output_pdf.exists():
             return
-        raise RuntimeError("LibreOffice conversion did not produce an output PDF.")
+        raise RuntimeError(
+            "LibreOffice conversion did not produce an output PDF. "
+            f"source={source_file.name}, ext={ext}. "
+            "This environment may not support the document filter for this format."
+        )
 
     if ext in IMAGE_EXTENSIONS:
         image_command = _resolve_imagemagick()

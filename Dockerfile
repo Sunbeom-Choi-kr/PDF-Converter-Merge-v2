@@ -9,6 +9,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     libreoffice \
+    libreoffice-writer \
+    libreoffice-java-common \
+    default-jre \
     imagemagick \
     wkhtmltopdf \
     pandoc \
