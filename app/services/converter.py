@@ -30,7 +30,7 @@ def _resolve_executable(cmd: str, windows_candidates: Optional[list[str]] = None
     return None
 
 
-def _resolve_imagemagick() -> Optional[str]:
+def _resolve_imagemagick() -> Optional[list[str]]:
     magick = _resolve_executable(
         "magick",
         windows_candidates=[
@@ -41,7 +41,12 @@ def _resolve_imagemagick() -> Optional[str]:
         ],
     )
     if magick:
-        return magick
+        return [magick]
+
+    # Debian/Ubuntu environments often provide ImageMagick 6 as `convert`.
+    convert_bin = _resolve_executable("convert")
+    if convert_bin:
+        return [convert_bin]
 
     if os.name == "nt":
         roots = [Path(os.path.expandvars(r"%ProgramFiles%")), Path(os.path.expandvars(r"%ProgramFiles(x86)%"))]
@@ -51,7 +56,7 @@ def _resolve_imagemagick() -> Optional[str]:
             for candidate_dir in root.glob("ImageMagick-*"):
                 binary = candidate_dir / "magick.exe"
                 if binary.exists():
-                    return str(binary)
+                    return [str(binary)]
     return None
 
 
@@ -126,9 +131,9 @@ async def convert_to_pdf(source_file: Path, output_pdf: Path) -> None:
         raise RuntimeError("LibreOffice conversion did not produce an output PDF.")
 
     if ext in IMAGE_EXTENSIONS:
-        magick = _resolve_imagemagick()
-        if magick:
-            await asyncio.to_thread(_run_command, [magick, str(source_file), str(output_pdf)])
+        image_command = _resolve_imagemagick()
+        if image_command:
+            await asyncio.to_thread(_run_command, [*image_command, str(source_file), str(output_pdf)])
             return
         raise RuntimeError("ImageMagick가 없어 이미지 변환을 수행할 수 없습니다.")
 
