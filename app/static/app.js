@@ -140,11 +140,6 @@ function addFiles(fileListLike) {
   renderFiles();
 }
 
-dropzone.addEventListener("click", () => {
-  // Allow selecting the same file repeatedly across mobile browsers.
-  fileInput.value = "";
-  fileInput.click();
-});
 dropzone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropzone.classList.add("active");
@@ -160,7 +155,11 @@ dropzone.addEventListener("drop", (e) => {
   dropText.textContent = "파일을 여기에 드래그하거나 클릭하여 선택";
   addFiles(e.dataTransfer.files);
 });
-fileInput.addEventListener("change", (e) => addFiles(e.target.files));
+fileInput.addEventListener("change", (e) => {
+  addFiles(e.target.files);
+  // Allow selecting the same file again in the next picker open.
+  e.target.value = "";
+});
 
 async function startProcess() {
   const formData = new FormData();
