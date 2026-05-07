@@ -11,7 +11,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
 
-OFFICE_EXTENSIONS = {".docx", ".doc", ".odt", ".rtf", ".xlsx", ".xls", ".ods", ".csv", ".pptx", ".ppt", ".odp"}
+OFFICE_EXTENSIONS = {".docx", ".doc", ".odt", ".rtf", ".xlsx", ".xls", ".ods", ".csv", ".pptx", ".ppt", ".odp", ".hwp", ".hwpx"}
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".tiff", ".bmp", ".gif", ".svg", ".heic"}
 HTML_EXTENSIONS = {".html", ".htm"}
 MARKDOWN_EXTENSIONS = {".md", ".markdown", ".rst", ".latex", ".epub"}
