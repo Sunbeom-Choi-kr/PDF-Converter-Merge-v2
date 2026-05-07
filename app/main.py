@@ -31,6 +31,11 @@ store = JobStore(STORAGE_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+@app.get("/healthz")
+async def healthz() -> JSONResponse:
+    return JSONResponse({"ok": True})
+
+
 @app.get("/")
 async def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
