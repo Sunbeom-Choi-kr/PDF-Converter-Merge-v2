@@ -4,3 +4,4 @@ python-multipart
 pypdf
 reportlab
 Pillow
+pyhwp>=0.1b15
