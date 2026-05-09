@@ -84,7 +84,14 @@ async def auth_config() -> JSONResponse:
 
 @app.get("/api/me")
 async def me(current_user: AuthUser = Depends(get_current_user)) -> JSONResponse:
-    return JSONResponse({"user_id": current_user.user_id, "email": current_user.email, "role": current_user.role})
+    return JSONResponse(
+        {
+            "user_id": current_user.user_id,
+            "email": current_user.email,
+            "role": current_user.role,
+            "is_admin": current_user.is_admin,
+        }
+    )
 
 
 @app.post("/api/upload")

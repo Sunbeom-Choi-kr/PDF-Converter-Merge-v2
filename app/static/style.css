@@ -304,6 +304,10 @@ button.success { background: var(--success); animation: pulse 1.4s infinite; }
 .plan-btn--secondary {
   background: #4b5563;
 }
+.plan-btn--pay {
+  margin-top: 10px;
+  background: #0f766e;
+}
 .plan-btn:hover { filter: brightness(1.05); }
 
 .plan-card__fineprint {

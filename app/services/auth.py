@@ -17,6 +17,7 @@ class AuthUser:
     user_id: str
     email: str | None
     role: str | None
+    is_admin: bool
 
 
 _JWKS_CACHE: dict[str, Any] = {"keys": {}, "fetched_at": 0.0}
@@ -111,10 +112,12 @@ def _payload_to_user(payload: dict[str, Any]) -> AuthUser:
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(status_code=401, detail="Token subject is missing")
+    email = payload.get("email")
     return AuthUser(
         user_id=user_id,
-        email=payload.get("email"),
+        email=email,
         role=payload.get("role"),
+        is_admin=(email or "").strip().lower() == "admin@admin",
     )
 
 
