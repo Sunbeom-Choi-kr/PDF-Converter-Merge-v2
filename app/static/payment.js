@@ -39,7 +39,7 @@
     const button = document.getElementById("tossPayButton");
     if (!button) return;
 
-    button.addEventListener("click", async function () {
+    async function requestTossPayment() {
       try {
         const tossPayments = TossPayments(config.client_key);
         const orderId = makeOrderId();
@@ -56,8 +56,16 @@
         });
       } catch (error) {
         setMessage(`결제창 호출 실패: ${error?.message || "알 수 없는 오류"}`, true);
+        button.classList.remove("hidden");
       }
-    });
+    }
+
+    // Auto-open payment module immediately after entering /payment
+    // from the "결제하기 (관리자)" click path.
+    await requestTossPayment();
+
+    // Manual retry fallback (for popup blocker / browser restrictions).
+    button.addEventListener("click", requestTossPayment);
   }
 
   async function initSuccessPage() {

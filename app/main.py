@@ -14,7 +14,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from dotenv import load_dotenv
+from dotenv import dotenv_values, load_dotenv
 
 from app.services.auth import AuthUser, get_current_user, get_current_user_or_query_token, get_public_auth_config
 from app.services.jobs import JobStore
@@ -28,6 +28,19 @@ STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 # Ensure local `.env` is loaded when running uvicorn directly.
 # override=True prevents stale empty env vars from shadowing .env values.
 load_dotenv(BASE_DIR.parent / ".env", override=True)
+ENV_FILE_PATH = BASE_DIR.parent / ".env"
+
+
+def _get_config_value(name: str) -> str:
+    value = (os.getenv(name) or "").strip()
+    if value:
+        return value
+    # Fallback: read directly from .env in case process env is stale.
+    try:
+        env_file_value = (dotenv_values(ENV_FILE_PATH).get(name) or "").strip()
+    except Exception:  # noqa: BLE001
+        env_file_value = ""
+    return env_file_value
 
 
 @asynccontextmanager
@@ -102,7 +115,7 @@ async def auth_config() -> JSONResponse:
 
 @app.get("/api/toss-config")
 async def toss_config() -> JSONResponse:
-    client_key = (os.getenv("TOSS_CLIENT_KEY") or "").strip()
+    client_key = _get_config_value("TOSS_CLIENT_KEY")
     return JSONResponse({"enabled": bool(client_key), "client_key": client_key})
 
 
@@ -129,7 +142,7 @@ async def toss_confirm(payload: dict, current_user: AuthUser = Depends(get_curre
     if not payment_key or not order_id or amount is None:
         raise HTTPException(status_code=400, detail="paymentKey, orderId, amount가 필요합니다.")
 
-    secret_key = (os.getenv("TOSS_SECRET_KEY") or "").strip()
+    secret_key = _get_config_value("TOSS_SECRET_KEY")
     if not secret_key:
         raise HTTPException(status_code=500, detail="TOSS_SECRET_KEY가 설정되지 않았습니다.")
 
