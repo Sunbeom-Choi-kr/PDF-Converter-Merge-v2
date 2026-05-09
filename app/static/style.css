@@ -162,6 +162,7 @@ button.success { background: var(--success); animation: pulse 1.4s infinite; }
   cursor: pointer;
 }
 .auth-nav__error { color: var(--error); font-size: 13px; }
+.auth-nav__warn { color: var(--warn); font-size: 13px; font-weight: 600; }
 
 /* HWP upsell on home */
 .hwp-upsell {

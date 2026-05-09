@@ -26,10 +26,20 @@ def _admin_emails() -> set[str]:
 def get_public_auth_config() -> dict[str, Any]:
     supabase_url = get_env("SUPABASE_URL").rstrip("/")
     supabase_anon_key = get_env("SUPABASE_ANON_KEY")
+    enabled = bool(supabase_url and supabase_anon_key)
+    issue: str | None = None
+    if not enabled:
+        if not supabase_url and not supabase_anon_key:
+            issue = "missing_both"
+        elif not supabase_url:
+            issue = "missing_url"
+        else:
+            issue = "missing_anon_key"
     return {
-        "enabled": bool(supabase_url and supabase_anon_key),
+        "enabled": enabled,
         "supabase_url": supabase_url,
         "supabase_anon_key": supabase_anon_key,
+        "issue": issue,
     }
 
 

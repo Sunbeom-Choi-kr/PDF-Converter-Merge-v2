@@ -5,8 +5,14 @@
   async function getConfig() {
     if (!_configPromise) {
       _configPromise = fetch("/api/auth-config")
-        .then((res) => res.json())
-        .catch(() => ({ enabled: false }));
+        .then(async (res) => {
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            return { enabled: false, issue: "http_error", httpStatus: res.status };
+          }
+          return data;
+        })
+        .catch(() => ({ enabled: false, issue: "fetch_failed" }));
     }
     return _configPromise;
   }
@@ -87,9 +93,27 @@
     return false;
   }
 
+  function authDisabledMessage(issue) {
+    const tips = {
+      missing_both: "Render 등 배포 환경에서 SUPABASE_URL, SUPABASE_ANON_KEY를 설정하세요.",
+      missing_url: "SUPABASE_URL 환경변수가 비어 있습니다.",
+      missing_anon_key: "SUPABASE_ANON_KEY 환경변수가 비어 있습니다.",
+      http_error: "/api/auth-config 요청이 실패했습니다. 서버 로그를 확인하세요.",
+      fetch_failed: "네트워크 오류로 인증 설정을 불러오지 못했습니다.",
+    };
+    const title = tips[issue] || tips.missing_both;
+    return `<span class="auth-nav__warn" title="${title}">인증 미설정</span>`;
+  }
+
   async function renderAuthNav() {
     const slot = document.getElementById("authNav");
     if (!slot) return;
+
+    const cfg = await getConfig();
+    if (!cfg.enabled) {
+      slot.innerHTML = authDisabledMessage(cfg.issue);
+      return;
+    }
 
     try {
       const user = await getUser();
