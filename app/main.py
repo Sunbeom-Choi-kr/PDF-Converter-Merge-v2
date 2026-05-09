@@ -11,6 +11,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
 
 from app.services.auth import AuthUser, get_current_user, get_current_user_or_query_token, get_public_auth_config
 from app.services.jobs import JobStore
@@ -20,6 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 STORAGE_DIR = BASE_DIR / "storage"
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Ensure local `.env` is loaded when running uvicorn directly.
+# override=True prevents stale empty env vars from shadowing .env values.
+load_dotenv(BASE_DIR.parent / ".env", override=True)
 
 
 @asynccontextmanager
