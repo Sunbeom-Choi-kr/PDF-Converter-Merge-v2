@@ -301,6 +301,9 @@ button.success { background: var(--success); animation: pulse 1.4s infinite; }
   background: var(--primary);
   color: #fff;
 }
+.plan-btn.hidden {
+  display: none;
+}
 .plan-btn--secondary {
   background: #4b5563;
 }
