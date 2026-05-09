@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
-import os
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
 from fastapi import Header, HTTPException, Request
+
+from app.services.env_config import get_env
 
 
 @dataclass
@@ -18,13 +19,13 @@ class AuthUser:
     is_admin: bool
 
 def _admin_emails() -> set[str]:
-    raw = os.getenv("ADMIN_EMAILS", "")
+    raw = get_env("ADMIN_EMAILS")
     return {email.strip().lower() for email in raw.split(",") if email.strip()}
 
 
 def get_public_auth_config() -> dict[str, Any]:
-    supabase_url = (os.getenv("SUPABASE_URL") or "").strip().rstrip("/")
-    supabase_anon_key = (os.getenv("SUPABASE_ANON_KEY") or "").strip()
+    supabase_url = get_env("SUPABASE_URL").rstrip("/")
+    supabase_anon_key = get_env("SUPABASE_ANON_KEY")
     return {
         "enabled": bool(supabase_url and supabase_anon_key),
         "supabase_url": supabase_url,
@@ -33,14 +34,14 @@ def get_public_auth_config() -> dict[str, Any]:
 
 
 def _issuer() -> str:
-    supabase_url = (os.getenv("SUPABASE_URL") or "").strip().rstrip("/")
+    supabase_url = get_env("SUPABASE_URL").rstrip("/")
     if not supabase_url:
         raise HTTPException(status_code=500, detail="SUPABASE_URL is not configured")
     return f"{supabase_url}/auth/v1"
 
 
 def _audience() -> str:
-    return (os.getenv("SUPABASE_JWT_AUDIENCE") or "authenticated").strip()
+    return get_env("SUPABASE_JWT_AUDIENCE") or "authenticated"
 
 
 def _extract_bearer_token(authorization: str | None) -> str | None:
@@ -56,7 +57,7 @@ def _extract_bearer_token(authorization: str | None) -> str | None:
 
 
 def _fetch_supabase_user(token: str) -> dict[str, Any]:
-    supabase_anon_key = (os.getenv("SUPABASE_ANON_KEY") or "").strip()
+    supabase_anon_key = get_env("SUPABASE_ANON_KEY")
     if not supabase_anon_key:
         raise HTTPException(status_code=500, detail="SUPABASE_ANON_KEY is not configured")
 

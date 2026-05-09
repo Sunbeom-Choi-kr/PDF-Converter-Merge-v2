@@ -6,11 +6,19 @@ services:
     autoDeploy: true
     healthCheckPath: /healthz
     envVars:
+      # Required for auth nav + API: set in Render Dashboard (Supabase project settings).
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY
         sync: false
       - key: SUPABASE_JWT_AUDIENCE
         value: authenticated
+      # Must include your Render service URL, e.g. https://your-service.onrender.com
       - key: APP_ALLOWED_ORIGINS
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: TOSS_CLIENT_KEY
+        sync: false
+      - key: TOSS_SECRET_KEY
         sync: false

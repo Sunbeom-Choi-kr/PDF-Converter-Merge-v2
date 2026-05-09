@@ -51,7 +51,9 @@ docker compose up --build
 1. GitHub 저장소를 Render에 연결
 2. **New +** → **Web Service**
 3. 저장소 선택 후 `render.yaml` 사용(자동 인식)
-4. Render Environment에서 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_ALLOWED_ORIGINS` 값을 입력
+4. Render Environment에서 반드시 설정: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_ALLOWED_ORIGINS`  
+   - 둘 중 하나라도 비어 있으면 메인 화면 우측 상단에 **인증 설정 오류**가 표시됩니다.  
+   - `APP_ALLOWED_ORIGINS`에는 배포 URL을 포함하세요 (예: `https://<서비스>.onrender.com`). 필요하면 로컬과 콤마로 병기합니다.
 5. 배포 완료 후 `https://<서비스주소>/healthz` 확인
 6. 서비스 URL 접속 후 웹 UI 사용
 
