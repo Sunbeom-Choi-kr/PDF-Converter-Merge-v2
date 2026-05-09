@@ -28,6 +28,7 @@ uvicorn app.main:app --reload
 - `SUPABASE_ANON_KEY`
 - `SUPABASE_JWT_AUDIENCE` (기본: `authenticated`)
 - `APP_ALLOWED_ORIGINS` (예: `http://127.0.0.1:8000,http://localhost:8000`)
+- `ADMIN_EMAILS` (콤마 구분, 예: `admin@admin,owner@example.com`)
 
 로컬에서는 `.env.example`를 참고해 `.env`를 생성한 뒤 실행하세요.
 

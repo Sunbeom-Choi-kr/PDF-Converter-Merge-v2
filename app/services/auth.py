@@ -25,6 +25,11 @@ _JWKS_LOCK = threading.Lock()
 _JWKS_TTL_SECONDS = 300
 
 
+def _admin_emails() -> set[str]:
+    raw = os.getenv("ADMIN_EMAILS", "")
+    return {email.strip().lower() for email in raw.split(",") if email.strip()}
+
+
 def get_public_auth_config() -> dict[str, Any]:
     supabase_url = (os.getenv("SUPABASE_URL") or "").strip().rstrip("/")
     supabase_anon_key = (os.getenv("SUPABASE_ANON_KEY") or "").strip()
@@ -113,11 +118,12 @@ def _payload_to_user(payload: dict[str, Any]) -> AuthUser:
     if not user_id:
         raise HTTPException(status_code=401, detail="Token subject is missing")
     email = payload.get("email")
+    normalized_email = (email or "").strip().lower()
     return AuthUser(
         user_id=user_id,
         email=email,
         role=payload.get("role"),
-        is_admin=(email or "").strip().lower() == "admin@admin",
+        is_admin=normalized_email in _admin_emails(),
     )
 
 
