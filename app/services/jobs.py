@@ -32,6 +32,7 @@ class FileTask:
 @dataclass
 class Job:
     job_id: str
+    owner_user_id: str
     session_dir: Path
     created_at: float = field(default_factory=time.time)
     tasks: list[FileTask] = field(default_factory=list)
@@ -71,7 +72,7 @@ class JobStore:
         self.jobs: dict[str, Job] = {}
         self.lock = asyncio.Lock()
 
-    async def create_job(self, files: list[tuple[str, bytes]], output_name: str) -> Job:
+    async def create_job(self, files: list[tuple[str, bytes]], output_name: str, owner_user_id: str) -> Job:
         if len(files) == 0:
             raise ValueError("At least one file is required.")
         if len(files) > MAX_FILES:
@@ -108,7 +109,13 @@ class JobStore:
         if not tasks:
             raise ValueError("All files were rejected by size constraints.")
 
-        job = Job(job_id=job_id, session_dir=session_dir, tasks=tasks, merge_file=session_dir / output_name)
+        job = Job(
+            job_id=job_id,
+            owner_user_id=owner_user_id,
+            session_dir=session_dir,
+            tasks=tasks,
+            merge_file=session_dir / output_name,
+        )
         async with self.lock:
             self.jobs[job_id] = job
         return job
@@ -168,6 +175,12 @@ class JobStore:
         if job_id not in self.jobs:
             raise KeyError("job not found")
         return self.jobs[job_id]
+
+    async def get_owned(self, job_id: str, owner_user_id: str) -> Job:
+        job = await self.get(job_id)
+        if job.owner_user_id != owner_user_id:
+            raise PermissionError("forbidden job access")
+        return job
 
     async def cleanup_job(self, job_id: str) -> None:
         async with self.lock:

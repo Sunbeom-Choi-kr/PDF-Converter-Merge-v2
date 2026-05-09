@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>요금제 | PDF Converter & Merger</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="container">
+    <nav class="site-nav card" aria-label="주요 메뉴">
+      <a href="/" class="site-nav__brand"><span class="site-nav__logo">PDF</span> Converter &amp; Merger</a>
+      <div class="site-nav__links">
+        <a href="/">변환하기</a>
+        <a href="/pricing" aria-current="page">요금제</a>
+      </div>
+      <div id="authNav" class="auth-nav"></div>
+    </nav>
+
+    <header class="pricing-hero card">
+      <h1>요금제</h1>
+      <p class="pricing-hero__sub">무료로 시작하거나, 한글(HWP) 출력 품질이 중요하면 Pro로 업그레이드하세요.</p>
+    </header>
+
+    <div class="pricing-grid">
+      <!-- Free -->
+      <article class="plan-card">
+        <header class="plan-card__head">
+          <h2 class="plan-card__title">Free</h2>
+          <p class="plan-card__price">0원 <span class="plan-card__period">/ 월</span></p>
+          <p class="plan-card__pitch">기본 변환·병합</p>
+        </header>
+        <div class="hwp-meter">
+          <div class="hwp-meter__label">
+            <span>HWP → PDF 서식 유사도</span>
+            <strong class="hwp-meter__pct hwp-meter__pct--free">~85%</strong>
+          </div>
+          <div class="hwp-meter__bar"><span class="hwp-meter__fill" style="width:85%"></span></div>
+          <p class="hwp-meter__note">LibreOffice · pyhwp 경로. 문서에 따라 편차 있습니다.</p>
+        </div>
+        <ul class="plan-features" role="list">
+          <li>HWP → PDF 지원 (보장 아님)</li>
+          <li>LibreOffice 기반 오피스·이미지 등 변환</li>
+          <li>PDF 병합·다운로드</li>
+          <li class="plan-features__muted">용량·대기: 기본 정책</li>
+        </ul>
+        <a class="plan-btn plan-btn--secondary" href="/">무료로 시작</a>
+      </article>
+
+      <!-- Pro -->
+      <article class="plan-card plan-card--popular">
+        <div class="plan-card__ribbon" aria-hidden="true">Most Popular</div>
+        <header class="plan-card__head">
+          <h2 class="plan-card__title">Pro</h2>
+          <p class="plan-card__price">9,900원 <span class="plan-card__period">/ 월</span></p>
+          <p class="plan-card__pitch">한글 문서까지 제대로</p>
+        </header>
+        <div class="hwp-meter hwp-meter--pro">
+          <div class="hwp-meter__label">
+            <span>HWP → PDF 서식 완성도</span>
+            <strong class="hwp-meter__pct hwp-meter__pct--pro">100%</strong>
+          </div>
+          <div class="hwp-meter__bar"><span class="hwp-meter__fill hwp-meter__fill--full" style="width:100%"></span></div>
+          <p class="hwp-meter__note">한컴 디벨로퍼 공식 API 기준 (연동 후 제공)</p>
+        </div>
+        <ul class="plan-features" role="list">
+          <li>Free의 모든 기능</li>
+          <li>HWP → PDF 완성도 100% 보장 (공식 API)</li>
+          <li>변환 우선 처리</li>
+          <li>파일당·총 용량 제한 완화 (정책 별도 안내)</li>
+        </ul>
+        <a
+          class="plan-btn"
+          href="mailto:sb322@naver.com?subject=%5BPro%20%EC%9A%94%EA%B8%88%EC%A0%9C%5D%20%EB%AC%B8%EC%9D%98"
+        >Pro 문의하기</a>
+        <p class="plan-card__fineprint">결제 시스템 연동 전까지 이메일로 신청을 받습니다.</p>
+      </article>
+    </div>
+
+    <section class="card pricing-compare-note">
+      <h2>비교 요약</h2>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th scope="col">항목</th>
+            <th scope="col">Free</th>
+            <th scope="col">Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">HWP 변환 품질</th>
+            <td>~85% (참고)</td>
+            <td><strong>100%</strong> (한컴 API)</td>
+          </tr>
+          <tr>
+            <th scope="row">기술 스택</th>
+            <td>LibreOffice · pyhwp</td>
+            <td>한컴 디벨로퍼 API</td>
+          </tr>
+          <tr>
+            <th scope="row">우선 처리</th>
+            <td>—</td>
+            <td>포함</td>
+          </tr>
+          <tr>
+            <th scope="row">용량 제한</th>
+            <td>기본</td>
+            <td>완화</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="footer">
+      <a href="/">← 변환 도구로 돌아가기</a> ·
+      문의: sb322@naver.com
+    </footer>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/static/auth.js"></script>
+  <script>
+    window.Auth.renderAuthNav();
+  </script>
+</body>
+</html>

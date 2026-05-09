@@ -22,6 +22,23 @@ const progressText = document.getElementById("progressText");
 const statusList = document.getElementById("statusList");
 const downloadBtn = document.getElementById("downloadBtn");
 
+async function apiFetch(url, options = {}) {
+  const token = await window.Auth.getAccessToken();
+  if (!token) {
+    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    throw new Error("로그인이 필요합니다.");
+  }
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${token}`);
+
+  const response = await fetch(url, { ...options, headers });
+  if (response.status === 401 || response.status === 403) {
+    window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    throw new Error("인증이 만료되었습니다. 다시 로그인해 주세요.");
+  }
+  return response;
+}
+
 function makeId() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
     return window.crypto.randomUUID();
@@ -187,7 +204,7 @@ async function startProcess() {
   formData.append("output_name", out.endsWith(".pdf") ? out : `${out}.pdf`);
   state.files.forEach((entry) => formData.append("files", entry.file, entry.name));
 
-  const upload = await fetch("/api/upload", { method: "POST", body: formData });
+  const upload = await apiFetch("/api/upload", { method: "POST", body: formData });
   if (!upload.ok) {
     showError((await upload.json()).detail || "업로드 실패");
     return;
@@ -203,7 +220,12 @@ async function startProcess() {
 async function monitorProgress() {
   if (!state.jobId) return;
 
-  const source = new EventSource(`/api/progress-stream/${state.jobId}`);
+  const token = await window.Auth.getAccessToken();
+  if (!token) {
+    showError("로그인이 필요합니다.");
+    return;
+  }
+  const source = new EventSource(`/api/progress-stream/${state.jobId}?access_token=${encodeURIComponent(token)}`);
   source.onmessage = async (event) => {
     const payload = JSON.parse(event.data);
     updateProgress(payload);
@@ -212,7 +234,7 @@ async function monitorProgress() {
     if (allDone) {
       source.close();
       progressText.textContent = "모든 파일 병합 중...";
-      const mergeResp = await fetch("/api/merge", {
+      const mergeResp = await apiFetch("/api/merge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ job_id: state.jobId, output_name: outputName.value.trim() || undefined }),
@@ -228,6 +250,9 @@ async function monitorProgress() {
       downloadBtn.classList.remove("hidden");
       triggerDownload();
     }
+  };
+  source.onerror = () => {
+    source.close();
   };
 }
 
@@ -263,16 +288,21 @@ function updateProgress(payload) {
     const skipBtn = li.querySelector("[data-skip]");
     if (skipBtn) {
       skipBtn.addEventListener("click", async () => {
-        await fetch(`/api/skip/${state.jobId}/${f.file_id}`, { method: "POST" });
+        await apiFetch(`/api/skip/${state.jobId}/${f.file_id}`, { method: "POST" });
       });
     }
     statusList.appendChild(li);
   });
 }
 
-function triggerDownload() {
+async function triggerDownload() {
   if (!state.mergeId) return;
-  const url = `/api/download/${state.mergeId}`;
+  const token = await window.Auth.getAccessToken();
+  if (!token) {
+    showError("로그인이 필요합니다.");
+    return;
+  }
+  const url = `/api/download/${state.mergeId}?access_token=${encodeURIComponent(token)}`;
   const a = document.createElement("a");
   a.href = url;
   a.download = "";
@@ -282,7 +312,7 @@ function triggerDownload() {
 startBtn.addEventListener("click", startProcess);
 downloadBtn.addEventListener("click", triggerDownload);
 resetBtn.addEventListener("click", async () => {
-  if (state.jobId) await fetch(`/api/cleanup/${state.jobId}`, { method: "DELETE" });
+  if (state.jobId) await apiFetch(`/api/cleanup/${state.jobId}`, { method: "DELETE" });
   state.files = [];
   state.jobId = null;
   state.mergeId = null;
@@ -294,3 +324,12 @@ resetBtn.addEventListener("click", async () => {
   errorBox.textContent = "";
   renderFiles();
 });
+
+async function init() {
+  await window.Auth.renderAuthNav();
+  const ok = await window.Auth.requireSession();
+  if (!ok) return;
+  renderFiles();
+}
+
+init();

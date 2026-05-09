@@ -9,3 +9,4 @@ lxml>=4.9.0
 cryptography>=41.0.0
 olefile>=0.46
 six>=1.16.0
+PyJWT>=2.8.0

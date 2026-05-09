@@ -8,6 +8,15 @@
 </head>
 <body>
   <main class="container">
+    <nav class="site-nav card" aria-label="주요 메뉴">
+      <a href="/" class="site-nav__brand"><span class="site-nav__logo">PDF</span> Converter &amp; Merger</a>
+      <div class="site-nav__links">
+        <a href="/" aria-current="page">변환하기</a>
+        <a href="/pricing">요금제</a>
+      </div>
+      <div id="authNav" class="auth-nav"></div>
+    </nav>
+
     <header class="card header">
       <div class="logo-row">
         <div class="logo">PDF</div>
@@ -18,6 +27,13 @@
       </div>
       <span class="badge">30+ 포맷 지원</span>
     </header>
+
+    <aside class="card hwp-upsell" role="note">
+      <div class="hwp-upsell__text">
+        <strong>HWP 변환</strong>은 무료 플랜에서도 지원합니다. 다만 복잡한 서식은 <em>~85% 수준</em>으로만 맞출 수 있어요.
+        <span class="hwp-upsell__pro">100% 동일 출력</span>이 필요하면 <a href="/pricing">Pro 요금제(한컴 공식 API)</a>를 확인하세요.
+      </div>
+    </aside>
 
     <section class="grid">
       <div class="card">
@@ -61,6 +77,8 @@
       문의: sb322@naver.com
     </footer>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/static/auth.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

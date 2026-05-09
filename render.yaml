@@ -5,3 +5,12 @@ services:
     plan: starter
     autoDeploy: true
     healthCheckPath: /healthz
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_JWT_AUDIENCE
+        value: authenticated
+      - key: APP_ALLOWED_ORIGINS
+        sync: false

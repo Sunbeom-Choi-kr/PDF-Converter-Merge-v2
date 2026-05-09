@@ -21,6 +21,16 @@ uvicorn app.main:app --reload
 
 브라우저에서 `http://127.0.0.1:8000` 접속
 
+### Supabase 환경변수 설정
+인증 기능을 사용하려면 아래 환경변수가 필요합니다.
+
+- `SUPABASE_URL` (예: `https://<project-ref>.supabase.co`)
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_JWT_AUDIENCE` (기본: `authenticated`)
+- `APP_ALLOWED_ORIGINS` (예: `http://127.0.0.1:8000,http://localhost:8000`)
+
+로컬에서는 `.env.example`를 참고해 `.env`를 생성한 뒤 실행하세요.
+
 ## Docker 실행
 ```bash
 docker compose up --build
@@ -32,8 +42,9 @@ docker compose up --build
 1. GitHub 저장소를 Render에 연결
 2. **New +** → **Web Service**
 3. 저장소 선택 후 `render.yaml` 사용(자동 인식)
-4. 배포 완료 후 `https://<서비스주소>/healthz` 확인
-5. 서비스 URL 접속 후 웹 UI 사용
+4. Render Environment에서 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_ALLOWED_ORIGINS` 값을 입력
+5. 배포 완료 후 `https://<서비스주소>/healthz` 확인
+6. 서비스 URL 접속 후 웹 UI 사용
 
 참고:
 - Render는 `PORT` 환경변수를 자동 주입하며, Docker CMD에서 이를 사용하도록 설정되어 있습니다.

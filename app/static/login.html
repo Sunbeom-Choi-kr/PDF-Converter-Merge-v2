@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 | PDF Converter &amp; Merger</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-auth-mode="login">
+  <main class="container">
+    <nav class="site-nav card" aria-label="주요 메뉴">
+      <a href="/" class="site-nav__brand"><span class="site-nav__logo">PDF</span> Converter &amp; Merger</a>
+      <div class="site-nav__links">
+        <a href="/">변환하기</a>
+        <a href="/pricing">요금제</a>
+      </div>
+      <div id="authNav" class="auth-nav"></div>
+    </nav>
+
+    <section class="card auth-card">
+      <h1>로그인</h1>
+      <p class="auth-subtitle">이메일로 로그인 후 파일 변환을 시작하세요.</p>
+      <form id="authForm" class="auth-form">
+        <label for="email">이메일</label>
+        <input id="email" type="email" autocomplete="email" required>
+        <label for="password">비밀번호</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button type="submit">로그인</button>
+      </form>
+      <p id="authMessage" class="auth-message"></p>
+      <p class="auth-help">계정이 없나요? <a href="/signup">회원가입</a></p>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/static/auth.js"></script>
+  <script src="/static/auth-pages.js"></script>
+</body>
+</html>
