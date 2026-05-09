@@ -4,6 +4,7 @@ import asyncio
 import os
 import shutil
 import subprocess
+import sys
 from contextlib import closing
 from functools import partial
 from pathlib import Path
@@ -127,7 +128,9 @@ def _hwp_bin_to_odt_with_pyhwp(source_file: Path, odt_out: Path) -> None:
         from hwp5.xmlmodel import Hwp5File
     except ImportError as error:
         raise RuntimeError(
-            "HWP(.hwp) 변환을 위해 pyhwp 패키지가 필요합니다. requirements.txt에 따라 설치했는지 확인하세요."
+            "HWP(.hwp) 변환을 위해 pyhwp 패키지가 필요합니다. "
+            f"python={sys.version.split()[0]}, executable={sys.executable}. "
+            "배포 환경에서 `pip install -r requirements.txt` 후 `python -c \"import hwp5\"`가 성공하는지 확인하세요."
         ) from error
 
     init_with_environ()
