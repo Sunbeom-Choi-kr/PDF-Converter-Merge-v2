@@ -132,10 +132,6 @@
       });
       if (!meResp.ok) return;
       const me = await meResp.json();
-      const debug = document.createElement("p");
-      debug.className = "plan-card__fineprint";
-      debug.textContent = `[DEBUG] email=${me.email || "-"} / is_admin=${me.is_admin}`;
-      document.querySelector(".plan-card--popular .plan-card__fineprint")?.after(debug);
       if (me.is_admin) {
         payBtn.classList.remove("hidden");
       }
