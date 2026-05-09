@@ -4,4 +4,8 @@ python-multipart
 pypdf
 reportlab
 Pillow
-pyhwp>=0.1b15
+pyhwp==0.1b15
+lxml>=4.9.0
+cryptography>=41.0.0
+olefile>=0.46
+six>=1.16.0

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 
@@ -18,7 +19,16 @@ STATIC_DIR = BASE_DIR / "static"
 STORAGE_DIR = BASE_DIR / "storage"
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="PDF Converter & Merger", version="1.0.0")
+
+@asynccontextmanager
+async def _lifespan(_: FastAPI):
+    from app.services.hwp_compat import log_pyhwp_stack_at_startup
+
+    log_pyhwp_stack_at_startup()
+    yield
+
+
+app = FastAPI(title="PDF Converter & Merger", version="1.0.0", lifespan=_lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -33,7 +43,9 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/healthz")
 async def healthz() -> JSONResponse:
-    return JSONResponse({"ok": True})
+    from app.services.hwp_compat import describe_pyhwp_stack
+
+    return JSONResponse({"ok": True, "pyhwp": describe_pyhwp_stack()})
 
 
 @app.get("/")

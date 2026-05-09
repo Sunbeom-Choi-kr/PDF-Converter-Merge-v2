@@ -4,7 +4,6 @@ import asyncio
 import os
 import shutil
 import subprocess
-import sys
 from contextlib import closing
 from functools import partial
 from pathlib import Path
@@ -120,6 +119,10 @@ def _libreoffice_convert_to_pdf(source_file: Path, output_pdf: Path, timeout_sec
 
 
 def _hwp_bin_to_odt_with_pyhwp(source_file: Path, odt_out: Path) -> None:
+    from app.services.hwp_compat import assert_pyhwp_import_chain
+
+    assert_pyhwp_import_chain()
+
     try:
         from hwp5.cli import init_with_environ
         from hwp5.dataio import ParseError
@@ -128,9 +131,8 @@ def _hwp_bin_to_odt_with_pyhwp(source_file: Path, odt_out: Path) -> None:
         from hwp5.xmlmodel import Hwp5File
     except ImportError as error:
         raise RuntimeError(
-            "HWP(.hwp) 변환을 위해 pyhwp 패키지가 필요합니다. "
-            f"python={sys.version.split()[0]}, executable={sys.executable}. "
-            "배포 환경에서 `pip install -r requirements.txt` 후 `python -c \"import hwp5\"`가 성공하는지 확인하세요."
+            "pyhwp(hwp5) 기본 의존성 검사는 통과했으나 하위 모듈 로드에 실패했습니다. 배포 산출물이 오래된지 확인하세요. "
+            f"원인: {error!s}"
         ) from error
 
     init_with_environ()

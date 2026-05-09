@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
-    && python -c "import hwp5"
+    && python -c "import importlib.metadata as m; print('pyhwp', m.version('pyhwp'))" \
+    && python -c "from hwp5.cli import init_with_environ; from hwp5.hwp5odt import ODTTransform; init_with_environ(); ODTTransform(); print('hwp_odt_engine_ok')"
 
 COPY app ./app
 
