@@ -1,6 +1,6 @@
-# PDF Converter & Merger (MVP)
+# PDF-Converter-Merge-v2
 
-PRD v1.0 기반 원페이지 웹 애플리케이션입니다.
+PDF Converter & Merger (MVP) — PRD v1.0 기반 원페이지 웹 애플리케이션입니다.
 
 ## 포함 기능
 - 드래그 앤 드롭 / 클릭 업로드
