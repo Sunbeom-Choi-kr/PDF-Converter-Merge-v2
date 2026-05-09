@@ -126,7 +126,7 @@ def _hwp_bin_to_odt_with_pyhwp(source_file: Path, odt_out: Path) -> None:
     try:
         from hwp5.cli import init_with_environ
         from hwp5.dataio import ParseError
-        from hwp5.errors import ImplementationNotAvailable, InvalidHwp5FileError
+        from hwp5.errors import ImplementationNotAvailable, InvalidHwp5FileError, ValidationFailed
         from hwp5.hwp5odt import ODTTransform, open_odtpkg
         from hwp5.xmlmodel import Hwp5File
     except ImportError as error:
@@ -137,6 +137,14 @@ def _hwp_bin_to_odt_with_pyhwp(source_file: Path, odt_out: Path) -> None:
 
     init_with_environ()
 
+    def _run_hwp_to_odt_package(odt_transform: "ODTTransform") -> None:
+        odt_transform.embedbin = False
+        transform = odt_transform.transform_hwp5_to_package
+        open_dest = partial(open_odtpkg, str(odt_out))
+        with closing(Hwp5File(str(source_file))) as hwp5file:
+            with open_dest() as dest:
+                transform(hwp5file, dest)
+
     try:
         odt_transform = ODTTransform()
     except ImplementationNotAvailable as error:
@@ -144,14 +152,15 @@ def _hwp_bin_to_odt_with_pyhwp(source_file: Path, odt_out: Path) -> None:
             "pyhwp ODT 변환을 위한 XSLT 엔진(lxml 등)을 사용할 수 없습니다."
         ) from error
 
-    odt_transform.embedbin = False
-    transform = odt_transform.transform_hwp5_to_package
-    open_dest = partial(open_odtpkg, str(odt_out))
-
     try:
-        with closing(Hwp5File(str(source_file))) as hwp5file:
-            with open_dest() as dest:
-                transform(hwp5file, dest)
+        try:
+            _run_hwp_to_odt_package(odt_transform)
+        except ValidationFailed:
+            # pyhwp validates generated ODF against Relax NG; some HWPs produce XML that
+            # fails validation but is still usable in LibreOffice. Retry without RNG checks.
+            odt_out.unlink(missing_ok=True)
+            odt_relaxed = ODTTransform(relaxng_compile=False)
+            _run_hwp_to_odt_package(odt_relaxed)
     except InvalidHwp5FileError as error:
         raise RuntimeError(
             "HWP 파일을 pyhwp로 열 수 없습니다. 암호화된 문서이거나 HWPX(.hwpx) 등 "
