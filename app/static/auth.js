@@ -47,6 +47,16 @@
     return session?.user || null;
   }
 
+  async function getMe() {
+    const token = await getAccessToken();
+    if (!token) return null;
+    const response = await fetch("/api/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) return null;
+    return response.json();
+  }
+
   async function signIn(email, password) {
     const client = await getClient();
     const { error } = await client.auth.signInWithPassword({ email, password });
@@ -84,8 +94,10 @@
     try {
       const user = await getUser();
       if (user) {
+        const me = await getMe();
+        const adminBadge = me?.is_admin ? '<span class="auth-nav__badge">[관리자]</span>' : "";
         slot.innerHTML = `
-          <span class="auth-nav__email">${user.email || "로그인 사용자"}</span>
+          <span class="auth-nav__email">${user.email || "로그인 사용자"} ${adminBadge}</span>
           <button id="logoutBtn" class="auth-nav__btn">로그아웃</button>
         `;
         const btn = document.getElementById("logoutBtn");
@@ -111,6 +123,7 @@
     getSession,
     getAccessToken,
     getUser,
+    getMe,
     signIn,
     signUp,
     signOut,

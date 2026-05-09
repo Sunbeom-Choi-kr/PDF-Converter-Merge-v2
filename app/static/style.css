@@ -135,6 +135,10 @@ button.success { background: var(--success); animation: pulse 1.4s infinite; }
   font-size: 13px;
   color: var(--gray);
 }
+.auth-nav__badge {
+  color: #1e3a8a;
+  font-weight: 700;
+}
 .auth-nav__link {
   color: var(--primary);
   text-decoration: none;
