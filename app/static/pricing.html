@@ -73,7 +73,7 @@
           class="plan-btn"
           href="mailto:sb322@naver.com?subject=%5BPro%20%EC%9A%94%EA%B8%88%EC%A0%9C%20%EB%AC%B8%EC%9D%98%5D%20PDF%20Converter%20%26%20Merger&body=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94.%20Pro%20%EC%9A%94%EA%B8%88%EC%A0%9C%20%EB%AC%B8%EC%9D%98%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4.%0A%0A-%20%EC%9D%B4%EB%A6%84%2F%ED%9A%8C%EC%82%AC%3A%20%0A-%20%EC%97%B0%EB%9D%BD%20%EC%9D%B4%EB%A9%94%EC%9D%BC%3A%20%0A-%20%EC%9B%94%20%EC%98%88%EC%83%81%20%EB%B3%80%ED%99%98%20%ED%8C%8C%EC%9D%BC%20%EC%88%98%3A%20%0A-%20%ED%95%84%EC%9A%94%20%EA%B8%B0%EB%8A%A5%20%28%EC%98%88%3A%20HWP%20100%25%20%EB%B3%B4%EC%9E%A5%2C%20%EC%9A%B0%EC%84%A0%20%EC%B2%98%EB%A6%AC%2C%20%EC%9A%A9%EB%9F%89%20%EC%99%84%ED%99%94%29%3A%20%0A-%20%EA%B8%B0%ED%83%80%20%EB%AC%B8%EC%9D%98%20%EB%82%B4%EC%9A%A9%3A%20"
         >Pro 문의하기</a>
-        <a id="proPaymentBtn" class="plan-btn plan-btn--pay hidden" href="/payment">결제하기 (관리자)</a>
+        <button id="proPaymentBtn" class="plan-btn plan-btn--pay hidden" type="button">결제하기 (관리자)</button>
         <p id="proPaymentMsg" class="auth-message auth-message--error hidden"></p>
         <p class="plan-card__fineprint">관리자 계정에서 Toss 결제 테스트를 진행할 수 있습니다.</p>
       </article>
@@ -119,6 +119,21 @@
       문의: sb322@naver.com
     </footer>
   </main>
+
+  <div id="paymentModal" class="hidden" style="position:fixed; inset:0; z-index:1000;">
+    <div id="paymentBackdrop" style="position:absolute; inset:0; background:rgba(17,24,39,0.55);"></div>
+    <div style="position:relative; max-width:560px; margin:8vh auto 0; background:#fff; border-radius:12px; padding:16px; box-shadow:0 12px 40px rgba(0,0,0,0.25);">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+        <strong>Pro 결제 진행</strong>
+        <button id="paymentModalClose" type="button" class="secondary" style="height:32px;">닫기</button>
+      </div>
+      <p style="margin:0 0 8px; font-size:13px; color:#4b5563;">결제수단을 선택하고 결제를 진행하세요.</p>
+      <div id="tp-payment-method"></div>
+      <div id="tp-agreement" style="margin-top:8px;"></div>
+      <button id="tpRequestBtn" class="plan-btn plan-btn--pay" type="button" style="margin-top:10px;">선택한 수단으로 결제 진행</button>
+    </div>
+  </div>
+
   <script src="https://js.tosspayments.com/v2/standard"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/static/auth.js"></script>
@@ -127,6 +142,10 @@
       await window.Auth.renderAuthNav();
       const payBtn = document.getElementById("proPaymentBtn");
       const payMsg = document.getElementById("proPaymentMsg");
+      const requestBtn = document.getElementById("tpRequestBtn");
+      const modal = document.getElementById("paymentModal");
+      const modalClose = document.getElementById("paymentModalClose");
+      const modalBackdrop = document.getElementById("paymentBackdrop");
       if (!payBtn) return;
 
       function setPayMessage(text) {
@@ -159,24 +178,49 @@
       }
 
       payBtn.classList.remove("hidden");
-      payBtn.addEventListener("click", function onAdminPayClick(event) {
-        event.preventDefault();
+      let widgets = null;
+
+      payBtn.addEventListener("click", async function onAdminPayClick() {
         try {
+          modal?.classList.remove("hidden");
+          if (widgets) return;
+
           const tossPayments = TossPayments(tossConfig.client_key);
-          tossPayments.requestPayment("CARD", {
-            amount: { currency: "KRW", value: 9900 },
+          widgets = tossPayments.widgets({
+            customerKey: me.user_id || TossPayments.ANONYMOUS,
+          });
+          await widgets.setAmount({ currency: "KRW", value: 9900 });
+          await Promise.all([
+            widgets.renderPaymentMethods({ selector: "#tp-payment-method" }),
+            widgets.renderAgreement({ selector: "#tp-agreement" }),
+          ]);
+        } catch (error) {
+          setPayMessage(`결제창 초기화 실패: ${error?.message || "알 수 없는 오류"}`);
+        }
+      });
+
+      function closeModal() {
+        modal?.classList.add("hidden");
+      }
+
+      modalClose?.addEventListener("click", closeModal);
+      modalBackdrop?.addEventListener("click", closeModal);
+
+      requestBtn?.addEventListener("click", async function onRequestPayment() {
+        if (!widgets) {
+          setPayMessage("결제 UI를 먼저 로드해주세요.");
+          return;
+        }
+        try {
+          await widgets.requestPayment({
             orderId: makeOrderId(),
             orderName: "PDF Converter Pro 월 구독",
             successUrl: window.location.origin + "/payment/success",
             failUrl: window.location.origin + "/payment/fail",
             customerEmail: me.email || undefined,
-          }).catch((error) => {
-            setPayMessage(`결제창 호출 실패: ${error?.message || "알 수 없는 오류"}`);
-            window.location.href = "/payment";
           });
         } catch (error) {
-          setPayMessage(`결제창 초기화 실패: ${error?.message || "알 수 없는 오류"}`);
-          window.location.href = "/payment";
+          setPayMessage(`결제 요청 실패: ${error?.message || "알 수 없는 오류"}`);
         }
       });
     })();
