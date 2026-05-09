@@ -29,8 +29,16 @@ uvicorn app.main:app --reload
 - `SUPABASE_JWT_AUDIENCE` (기본: `authenticated`)
 - `APP_ALLOWED_ORIGINS` (예: `http://127.0.0.1:8000,http://localhost:8000`)
 - `ADMIN_EMAILS` (콤마 구분, 예: `admin@admin,owner@example.com`)
+- `TOSS_CLIENT_KEY` (Toss 결제위젯 클라이언트 키)
+- `TOSS_SECRET_KEY` (Toss 시크릿 키, 서버 승인 API 전용)
 
 로컬에서는 `.env.example`를 참고해 `.env`를 생성한 뒤 실행하세요.
+
+### Toss 결제 키 발급 위치
+- [Toss Payments 개발자센터](https://developers.tosspayments.com/) 로그인
+- **개발자센터 > API 키** 메뉴에서 상점(MID)을 선택
+- 결제위젯용 `Client Key`, `Secret Key`를 복사해 환경변수에 설정
+- 테스트는 `test_ck_...`, `test_sk_...` 키를 사용하고, 운영 전환 시 `live_...` 키로 교체
 
 ## Docker 실행
 ```bash

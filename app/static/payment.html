@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro 결제 | PDF Converter & Merger</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="payment">
+  <main class="container">
+    <nav class="site-nav card" aria-label="주요 메뉴">
+      <a href="/" class="site-nav__brand"><span class="site-nav__logo">PDF</span> Converter &amp; Merger</a>
+      <div class="site-nav__links">
+        <a href="/">변환하기</a>
+        <a href="/pricing">요금제</a>
+      </div>
+      <div id="authNav" class="auth-nav"></div>
+    </nav>
+
+    <section class="card auth-card">
+      <h1>Pro 요금제 결제</h1>
+      <p class="auth-subtitle">관리자 전용 결제 페이지입니다. 테스트 키에서는 실제 과금되지 않습니다.</p>
+      <p><strong>결제 금액:</strong> 9,900원 / 월</p>
+      <button id="tossPayButton" type="button">토스 결제창 열기</button>
+      <p id="paymentMessage" class="auth-message"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <script src="/static/auth.js"></script>
+  <script src="/static/payment.js"></script>
+</body>
+</html>

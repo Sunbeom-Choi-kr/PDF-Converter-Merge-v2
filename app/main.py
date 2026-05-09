@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
+import urllib.error
+import urllib.request
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -77,9 +80,30 @@ async def signup_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "signup.html")
 
 
+@app.get("/payment")
+async def payment_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "payment.html")
+
+
+@app.get("/payment/success")
+async def payment_success_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "payment-success.html")
+
+
+@app.get("/payment/fail")
+async def payment_fail_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "payment-fail.html")
+
+
 @app.get("/api/auth-config")
 async def auth_config() -> JSONResponse:
     return JSONResponse(get_public_auth_config())
+
+
+@app.get("/api/toss-config")
+async def toss_config() -> JSONResponse:
+    client_key = (os.getenv("TOSS_CLIENT_KEY") or "").strip()
+    return JSONResponse({"enabled": bool(client_key), "client_key": client_key})
 
 
 @app.get("/api/me")
@@ -92,6 +116,52 @@ async def me(current_user: AuthUser = Depends(get_current_user)) -> JSONResponse
             "is_admin": current_user.is_admin,
         }
     )
+
+
+@app.post("/api/toss/confirm")
+async def toss_confirm(payload: dict, current_user: AuthUser = Depends(get_current_user)) -> JSONResponse:
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="관리자만 결제를 승인할 수 있습니다.")
+
+    payment_key = payload.get("paymentKey")
+    order_id = payload.get("orderId")
+    amount = payload.get("amount")
+    if not payment_key or not order_id or amount is None:
+        raise HTTPException(status_code=400, detail="paymentKey, orderId, amount가 필요합니다.")
+
+    secret_key = (os.getenv("TOSS_SECRET_KEY") or "").strip()
+    if not secret_key:
+        raise HTTPException(status_code=500, detail="TOSS_SECRET_KEY가 설정되지 않았습니다.")
+
+    auth = base64.b64encode(f"{secret_key}:".encode("utf-8")).decode("ascii")
+    body = json.dumps(
+        {
+            "paymentKey": payment_key,
+            "orderId": order_id,
+            "amount": amount,
+        }
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        url="https://api.tosspayments.com/v1/payments/confirm",
+        method="POST",
+        data=body,
+        headers={
+            "Authorization": f"Basic {auth}",
+            "Content-Type": "application/json",
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            return JSONResponse(json.loads(response.read().decode("utf-8")))
+    except urllib.error.HTTPError as error:
+        try:
+            detail = json.loads(error.read().decode("utf-8"))
+        except Exception:  # noqa: BLE001
+            detail = {"message": "결제 승인 요청이 실패했습니다."}
+        raise HTTPException(status_code=error.code, detail=detail) from error
+    except Exception as error:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"결제 승인 중 오류가 발생했습니다: {error}") from error
 
 
 @app.post("/api/upload")

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>결제 성공 | PDF Converter & Merger</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="payment-success">
+  <main class="container">
+    <section class="card auth-card">
+      <h1>결제 승인 처리 중</h1>
+      <p class="auth-subtitle">서버에서 결제 승인 API를 호출하고 있습니다.</p>
+      <p id="paymentMessage" class="auth-message"></p>
+      <p class="auth-help"><a href="/pricing">요금제 페이지로 돌아가기</a></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/static/auth.js"></script>
+  <script src="/static/payment.js"></script>
+</body>
+</html>
