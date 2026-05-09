@@ -91,6 +91,9 @@ function renderFiles() {
     li.querySelectorAll("[data-move]").forEach((btn) => {
       btn.addEventListener("click", () => moveItem(index, btn.dataset.move));
     });
+    li.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("dragstart", (e) => e.preventDefault());
+    });
     bindDnD(li);
     fileList.appendChild(li);
   });
@@ -107,24 +110,40 @@ function moveItem(index, direction) {
 }
 
 function bindDnD(item) {
-  item.addEventListener("dragstart", () => item.classList.add("dragging"));
-  item.addEventListener("dragend", () => item.classList.remove("dragging"));
+  item.addEventListener("dragstart", (ev) => {
+    item.classList.add("dragging");
+    ev.dataTransfer.effectAllowed = "move";
+    ev.dataTransfer.setData("text/plain", item.dataset.id || "");
+  });
+  item.addEventListener("dragend", () => {
+    item.classList.remove("dragging");
+    applyFileOrderFromDom();
+  });
+}
+
+function applyFileOrderFromDom() {
+  const ids = [...fileList.querySelectorAll(".file-item")].map((li) => li.dataset.id);
+  if (ids.length === 0 || ids.length !== state.files.length) return;
+  state.files.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
 }
 
 fileList.addEventListener("dragover", (e) => {
   e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
   const dragging = fileList.querySelector(".dragging");
   if (!dragging) return;
   const items = [...fileList.querySelectorAll(".file-item:not(.dragging)")];
-  const next = items.find((node) => e.clientY <= node.offsetTop + node.offsetHeight / 2);
+  const next = items.find((node) => {
+    const box = node.getBoundingClientRect();
+    return e.clientY < box.top + box.height / 2;
+  });
   if (next) fileList.insertBefore(dragging, next);
   else fileList.appendChild(dragging);
 });
 
-fileList.addEventListener("drop", () => {
-  const ids = [...fileList.querySelectorAll(".file-item")].map((li) => li.dataset.id);
-  state.files.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
-  renderFiles();
+fileList.addEventListener("drop", (e) => {
+  e.preventDefault();
+  applyFileOrderFromDom();
 });
 
 function addFiles(fileListLike) {
